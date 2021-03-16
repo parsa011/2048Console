@@ -23,6 +23,7 @@ namespace _2048Console
         {
             PrintBoard();
             GenerateRandomNumberOnBoard(3);
+            MovesCount = 0;
             while(GameGoesOn)
             {
                 Console.Clear();
@@ -76,6 +77,9 @@ namespace _2048Console
                 {0,0,0,0},
                 {0,0,0,0},
             };
+            Console.Clear();
+            PrintBoard();
+            GenerateRandomNumberOnBoard(3);
             MovesCount = 0;
         }
 
