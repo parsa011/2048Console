@@ -52,13 +52,31 @@ namespace _2048Console
                 VerticalMove();
             else if (keyinfo.Key == ConsoleKey.DownArrow)
                 VerticalMove(false);
-            else if(keyinfo.Key == ConsoleKey.RightArrow)
+            else if (keyinfo.Key == ConsoleKey.RightArrow)
                 HorizontalMove(false);
-            else if(keyinfo.Key == ConsoleKey.LeftArrow)
+            else if (keyinfo.Key == ConsoleKey.LeftArrow)
                 HorizontalMove();
+            else if (keyinfo.Key == ConsoleKey.R)
+                ResetGame();
             else   
                 Console.WriteLine("Plese Press Valid key");
             
+        }
+
+        private static void ResetGame()
+        {
+            FreeSpawns.Clear();
+            UserWone = true;
+            GameGoesOn = true;
+            Score = 0;
+            Board = new int[,]
+            {
+                {0,0,0,0},
+                {0,0,0,0},
+                {0,0,0,0},
+                {0,0,0,0},
+            };
+            MovesCount = 0;
         }
 
         private static void VerticalMove(bool downToUp = true)
@@ -128,6 +146,7 @@ namespace _2048Console
                     }
                     i--;
                 }
+                MovesCount++;
             }
         }
 
@@ -144,7 +163,8 @@ namespace _2048Console
         private static void PrintBoard()
         {
             Console.Write("\n\n");
-            Console.Write($"\t\t\tscore is : {Score}\n\n");
+            Console.Write($"\t\t\tscore is : {Score}\n");
+            Console.Write($"\t\t\tMovesCount is : {MovesCount}\n\n");
             for(var i = 0; i < 4;i++)
             {
                 Console.Write("\t\t\t");
