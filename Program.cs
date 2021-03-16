@@ -28,7 +28,7 @@ namespace _2048Console
                 Console.Clear();
                 PrintBoard();
                 ReadKey();
-                CheckForLose();
+                //CheckForLose();
                 GenerateRandomNumberOnBoard();
                 CalculateScore();
             }
@@ -49,21 +49,16 @@ namespace _2048Console
         {
             ConsoleKeyInfo keyinfo = Console.ReadKey();
             if (keyinfo.Key == ConsoleKey.UpArrow)
-            {
                 VerticalMove();
-            }
             else if (keyinfo.Key == ConsoleKey.DownArrow)
-            {
                 VerticalMove(false);
-            }
             else if(keyinfo.Key == ConsoleKey.RightArrow)
-            {
                 HorizontalMove(false);
-            }
-             else if(keyinfo.Key == ConsoleKey.LeftArrow)
-            {
+            else if(keyinfo.Key == ConsoleKey.LeftArrow)
                 HorizontalMove();
-            }
+            else   
+                Console.WriteLine("Plese Press Valid key");
+            
         }
 
         private static void VerticalMove(bool downToUp = true)
