@@ -15,8 +15,9 @@ namespace _2048Console
             {0,0,0,0},
             {0,0,0,0},
         };
-
+        public static int Score = 0;
         public static Dictionary<string,(int,int)> FreeSpawns = new Dictionary<string,(int,int)>();
+        public static bool UserWone  = true;
 
         static void Main(string[] args)
         {
@@ -27,7 +28,20 @@ namespace _2048Console
                 Console.Clear();
                 PrintBoard();
                 ReadKey();
+                CheckForLose();
                 GenerateRandomNumberOnBoard();
+                CalculateScore();
+            }
+            Console.WriteLine("You" + (UserWone ? "Wone" : "Lose"));
+            Console.ReadKey();
+        }
+
+        private static void CheckForLose()
+        {
+            if(FreeSpawns.Count == 0)
+            {
+                UserWone = false;
+                GameGoesOn = false;
             }
         }
 
@@ -42,6 +56,14 @@ namespace _2048Console
             {
                 VerticalMove(false);
             }
+            else if(keyinfo.Key == ConsoleKey.RightArrow)
+            {
+                HorizontalMove(false);
+            }
+             else if(keyinfo.Key == ConsoleKey.LeftArrow)
+            {
+                HorizontalMove();
+            }
         }
 
         private static void VerticalMove(bool downToUp = true)
@@ -55,10 +77,10 @@ namespace _2048Console
                     {
                         var nextI = downToUp ? i + 1 : i - 1;
                         if(Board[nextI,j] == Board[i,j] || Board[i,j] == 0)
-                        {
+                        {           
                             var next = Board[nextI,j];
                             Board[nextI,j] = 0;
-                            Board[i,j] += next;
+                            Board[i,j] += next;    
                         }
                         i = downToUp ? i + 1 : i - 1;
                     }
@@ -67,25 +89,50 @@ namespace _2048Console
             }
         }
 
+        private static void HorizontalMove(bool leftToRight = true)
+        {
+            var jIndexValue = leftToRight ? 0 : 3;
+            for(var i = 0; i < 4;i++)
+            {
+                for(var loop = 0; loop < 4;loop++)
+                {
+                    for(var j = jIndexValue; leftToRight ? j < 3 : j > 0;)
+                    {
+                        var nextJ = leftToRight ? j + 1 : j - 1;
+                        if(Board[i,nextJ] == Board[i,j] || Board[i,j] == 0)
+                        {           
+                            var next = Board[i,nextJ];
+                            Board[i,nextJ] = 0;
+                            Board[i,j] += next;
+                        }
+                        j = leftToRight ? j + 1 : j - 1;
+                    }
+                }
+            }
+        }
+
         private static void GenerateRandomNumberOnBoard(int count = 1)
         {
-            var allowedNumber = new int[]{2,4};
-            Random rnd;
-            for(var i = 0; i < count;i++)
+            if(FreeSpawns.Count != 0)
             {
-                rnd = new Random(DateTime.Now.Second);
-                int targetIndex = 0,forWrite;
-                forWrite = rnd.Next(0,2);
-                targetIndex = rnd.Next(0,FreeSpawns.Count);
-                int x = FreeSpawns.ToList()[targetIndex].Value.Item1;
-                int y = FreeSpawns.ToList()[targetIndex].Value.Item2;
-                GetIndexValue(x,y,out var thisIndex);
-                if(thisIndex == 0)
+                var allowedNumber = new int[]{2,4};
+                Random rnd;
+                for(var i = 0; i < count;i++)
                 {
-                    WriteOnBoard(x,y,allowedNumber[forWrite]);
-                    continue;
+                    rnd = new Random(DateTime.Now.Second);
+                    int targetIndex = 0,forWrite;
+                    forWrite = rnd.Next(0,2);
+                    targetIndex = rnd.Next(0,FreeSpawns.Count);
+                    int x = FreeSpawns.ToList()[targetIndex].Value.Item1;
+                    int y = FreeSpawns.ToList()[targetIndex].Value.Item2;
+                    GetIndexValue(x,y,out var thisIndex);
+                    if(thisIndex == 0)
+                    {
+                        WriteOnBoard(x,y,allowedNumber[forWrite]);
+                        continue;
+                    }
+                    i--;
                 }
-                i--;
             }
         }
 
@@ -102,16 +149,13 @@ namespace _2048Console
         private static void PrintBoard()
         {
             Console.Write("\n\n");
+            Console.Write($"\t\t\tscore is : {Score}\n\n");
             for(var i = 0; i < 4;i++)
             {
                 Console.Write("\t\t\t");
                 for(var j = 0; j < 4;j++)
                 {
                     var value = Board[i,j];
-                    if(value == 0)
-                        FreeSpawns.Add(Guid.NewGuid().ToString(),(i,j));
-                    else if(FreeSpawns.Any(a=>a.Value.Item1 == i && a.Value.Item2 == j))
-                        FreeSpawns.Remove(FreeSpawns.FirstOrDefault(a=> a.Value.Item1 == i && a.Value.Item2 == j).Key);
                     if(value == 2)
                         Console.ForegroundColor = ConsoleColor.Green;
                     else if(value == 4)
@@ -120,10 +164,46 @@ namespace _2048Console
                         Console.ForegroundColor = ConsoleColor.Yellow;
                     else if(value == 16)
                         Console.ForegroundColor = ConsoleColor.Cyan;
+                    else if(value == 32)
+                        Console.ForegroundColor = ConsoleColor.Magenta;
+                    else if(value == 64)
+                        Console.ForegroundColor = ConsoleColor.DarkYellow;
+                    else if(value == 128)
+                        Console.ForegroundColor = ConsoleColor.DarkMagenta;
+                    else if(value == 256)
+                        Console.ForegroundColor = ConsoleColor.Gray;
+                    else if(value == 512)
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
                     Console.Write(value + "\t");
                     Console.ResetColor();
                 }
                 Console.WriteLine("\n\n");
+            }
+            CollectZeroIndexes();
+        }
+
+        private static void CollectZeroIndexes()
+        {
+            FreeSpawns.Clear();
+            for (int i = 0; i < 4; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    var value = Board[i,j];
+                    if(value == 0) FreeSpawns.Add(Guid.NewGuid().ToString(),(i,j));
+                }
+            }
+        }
+
+        public static void CalculateScore()
+        {
+            Score = 0;
+            for (int i = 0; i < 4; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    Score += Board[i,j];
+                }
             }
         }
 
